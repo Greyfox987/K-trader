@@ -8,7 +8,7 @@ import sys
 
 # ── YOUR ALPACA KEYS ──────────────────────
 API_KEY = "PK7OBTF6ZJA4XZR3QOYCDUVR4J"
-SECRET_KEY = "5mWoKam6d8EPwS5iBNzqec4FsrjM8Xyytun8ewf8rn6b                                   "
+SECRET_KEY = "5mWoKam6d8EPwS5iBNzqec4FsrjM8Xyytun8ewf8rn6b"                                   "
 BASE_URL = "https://paper-api.alpaca.markets"
 
 # ── CONNECT TO ALPACA ─────────────────────
