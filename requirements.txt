@@ -1,8 +1,9 @@
-yfinance==0.2.51
-alpaca-trade-api==3.2.0
-schedule==1.2.2
-pandas==2.2.2
+yfinance
+alpaca-trade-api
+schedule
+pandas
 setuptools
-huggingface-hub==0.33.1
-einops==0.8.1
+huggingface-hub
+einops
 requests
+numpy<2.0
