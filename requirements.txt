@@ -1,0 +1,7 @@
+yfinance
+alpaca-trade-api
+schedule
+pandas
+torch
+huggingface-hub
+einops
