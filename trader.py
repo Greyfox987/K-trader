@@ -1,24 +1,38 @@
+import os
+import sys
+import schedule
+import time
 import yfinance as yf
 import pandas as pd
 import alpaca_trade_api as tradeapi
-import schedule
-import time
-import os
-import sys
 
-# ── YOUR ALPACA KEYS ──────────────────────
-API_KEY = "PK7OBTF6ZJA4XZR3QOYCDUVR4J"
-SECRET_KEY = "5mWoKam6d8EPwS5iBNzqec4FsrjM8Xyytun8ewf8rn6b"
+# ── ALPACA KEYS ───────────────────────────
+API_KEY = "PKPHTRVSUUGNMGBY3WHJVGJ5L6"
+SECRET_KEY = "82qFM9TdgU4XsixsjRZRGtcQoNkbaQRP3UDNp94LSo97"
 BASE_URL = "https://paper-api.alpaca.markets"
 
-# ── CONNECT TO ALPACA ─────────────────────
+# ── CONNECT ALPACA ────────────────────────
 api = tradeapi.REST(API_KEY, SECRET_KEY, BASE_URL)
+print(f"✅ Alpaca connected!")
+print(f"Balance: ${api.get_account().portfolio_value}")
 
-def run_trade():
+# ── LOAD KRONOS ───────────────────────────
+if not os.path.exists('/app/Kronos'):
+    os.system('git clone https://github.com/shiyu-coder/Kronos /app/Kronos -q')
+
+sys.path.insert(0, '/app/Kronos')
+os.chdir('/app/Kronos')
+
+from model import Kronos, KronosTokenizer, KronosPredictor
+tokenizer = KronosTokenizer.from_pretrained("NeoQuasar/Kronos-Tokenizer-base")
+model = Kronos.from_pretrained("NeoQuasar/Kronos-small")
+predictor = KronosPredictor(model, tokenizer, max_context=512)
+print("✅ Kronos loaded!")
+
+# ── TRADE FUNCTION ────────────────────────
+def run_kronos_trade():
     try:
-        print("=== Kronos Trader Running ===")
-
-        # Get fresh BTC data
+        print("=== Running Kronos Trade ===")
         df = yf.download("BTC-USD", interval="1h",
                          period="15d", auto_adjust=True)
         df = df.reset_index()
@@ -48,7 +62,7 @@ def run_trade():
         forecast = float(pred_df['close'].iloc[-1])
         signal = (forecast - current) / current
 
-        print(f"Forecast: ${forecast:,.2f}")
+        print(f"24hr Forecast: ${forecast:,.2f}")
         print(f"Signal: {signal*100:.2f}%")
 
         try:
@@ -69,25 +83,14 @@ def run_trade():
         else:
             print("➡️ HOLD")
 
-        print(f"Balance: ${api.get_account().portfolio_value}")
+        print(f"Account: ${api.get_account().portfolio_value}")
 
     except Exception as e:
         print(f"Error: {e}")
 
-# Load Kronos
-sys.path.insert(0, '/app/Kronos')
-os.system('git clone https://github.com/shiyu-coder/Kronos /app/Kronos')
-os.system('pip install -r /app/Kronos/requirements.txt -q')
-
-from model import Kronos, KronosTokenizer, KronosPredictor
-tokenizer = KronosTokenizer.from_pretrained("NeoQuasar/Kronos-Tokenizer-base")
-model = Kronos.from_pretrained("NeoQuasar/Kronos-small")
-predictor = KronosPredictor(model, tokenizer, max_context=512)
-print("✅ Kronos loaded!")
-
-# Run immediately then every hour
-run_trade()
-schedule.every(1).hours.do(run_trade)
+# ── RUN IMMEDIATELY THEN EVERY HOUR ──────
+run_kronos_trade()
+schedule.every(1).hours.do(run_kronos_trade)
 
 while True:
     schedule.run_pending()
